@@ -23,6 +23,10 @@ from utils import is_truthy_value
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_AGENT_EXECUTOR_WORKERS = 10
+MAX_AGENT_EXECUTOR_WORKERS = 32
+
+
 def _coerce_bool(value: Any, default: bool = True) -> bool:
     """Coerce bool-ish config values, preserving a caller-provided default."""
     if value is None:
@@ -127,6 +131,42 @@ def _coerce_optional_positive_int(value: Any, key: str) -> Optional[int]:
         return None
     if parsed <= 0:
         return None
+    return parsed
+
+
+def _coerce_positive_int(
+    value: Any,
+    key: str,
+    default: int,
+    *,
+    maximum: Optional[int] = None,
+) -> int:
+    """Coerce a required positive integer, falling back on invalid input."""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        parsed = None
+    else:
+        try:
+            if isinstance(value, float) and not value.is_integer():
+                raise ValueError(value)
+            parsed = int(value)
+        except (TypeError, ValueError):
+            parsed = None
+    if parsed is None or parsed <= 0 or (maximum is not None and parsed > maximum):
+        expected = (
+            f"an integer between 1 and {maximum}"
+            if maximum is not None
+            else "a positive integer"
+        )
+        logger.warning(
+            "Ignoring invalid %s=%r (expected %s); using %d",
+            key,
+            value,
+            expected,
+            default,
+        )
+        return default
     return parsed
 
 
@@ -786,6 +826,11 @@ class GatewayConfig:
     # dict with: name, platform, profile, and optional guild_id/chat_id/thread_id.
     profile_routes: list = field(default_factory=list)
 
+    # Worker threads that run synchronous agent turns without blocking the
+    # gateway event loop. Applied when the pool is created; restart to change.
+    # Keep new fields at the end to preserve positional-constructor compatibility.
+    agent_executor_workers: int = DEFAULT_AGENT_EXECUTOR_WORKERS
+
     def get_connected_platforms(self) -> List[Platform]:
         """Return list of platforms that are enabled and configured."""
         connected = []
@@ -888,6 +933,7 @@ class GatewayConfig:
             "group_sessions_per_user": self.group_sessions_per_user,
             "thread_sessions_per_user": self.thread_sessions_per_user,
             "max_concurrent_sessions": self.max_concurrent_sessions,
+            "agent_executor_workers": self.agent_executor_workers,
             "multiplex_profiles": self.multiplex_profiles,
             "unauthorized_dm_behavior": self.unauthorized_dm_behavior,
             "streaming": self.streaming.to_dict(),
@@ -950,8 +996,8 @@ class GatewayConfig:
         group_sessions_per_user = data.get("group_sessions_per_user")
         thread_sessions_per_user = data.get("thread_sessions_per_user")
         multiplex_profiles = data.get("multiplex_profiles")
-        nested_gateway = data.get("gateway") if isinstance(data.get("gateway"), dict) else {}
-        if multiplex_profiles is None and isinstance(nested_gateway, dict):
+        nested_gateway = _coerce_dict(data.get("gateway"))
+        if multiplex_profiles is None:
             # Also honor gateway.multiplex_profiles written by
             # ``hermes config set gateway.multiplex_profiles true``.
             multiplex_profiles = nested_gateway.get("multiplex_profiles")
@@ -976,6 +1022,18 @@ class GatewayConfig:
         max_concurrent_sessions = _coerce_optional_positive_int(
             max_concurrent_raw,
             max_concurrent_key,
+        )
+        if "agent_executor_workers" in data:
+            agent_executor_workers_raw = data.get("agent_executor_workers")
+            agent_executor_workers_key = "agent_executor_workers"
+        else:
+            agent_executor_workers_raw = nested_gateway.get("agent_executor_workers")
+            agent_executor_workers_key = "gateway.agent_executor_workers"
+        agent_executor_workers = _coerce_positive_int(
+            agent_executor_workers_raw,
+            agent_executor_workers_key,
+            DEFAULT_AGENT_EXECUTOR_WORKERS,
+            maximum=MAX_AGENT_EXECUTOR_WORKERS,
         )
         unauthorized_dm_behavior = _normalize_unauthorized_dm_behavior(
             data.get("unauthorized_dm_behavior"),
@@ -1011,6 +1069,7 @@ class GatewayConfig:
             thread_sessions_per_user=_coerce_bool(thread_sessions_per_user, False),
             multiplex_profiles=_coerce_bool(multiplex_profiles, False),
             max_concurrent_sessions=max_concurrent_sessions,
+            agent_executor_workers=agent_executor_workers,
             unauthorized_dm_behavior=unauthorized_dm_behavior,
             streaming=StreamingConfig.from_dict(data.get("streaming", {})),
             session_store_max_age_days=session_store_max_age_days,
@@ -1145,6 +1204,8 @@ def load_gateway_config() -> GatewayConfig:
                     gw_data["multiplex_profiles"] = gateway_section["multiplex_profiles"]
                 if "max_concurrent_sessions" in gateway_section:
                     gw_data["max_concurrent_sessions"] = gateway_section["max_concurrent_sessions"]
+                if "agent_executor_workers" in gateway_section:
+                    gw_data["agent_executor_workers"] = gateway_section["agent_executor_workers"]
 
             if "max_concurrent_sessions" in yaml_cfg:
                 gw_data["max_concurrent_sessions"] = yaml_cfg["max_concurrent_sessions"]

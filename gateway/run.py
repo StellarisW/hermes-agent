@@ -1816,6 +1816,7 @@ if not _configured_cwd or _configured_cwd in CWD_PLACEHOLDERS:
 
 from gateway.config import (
     ChannelOverride,
+    DEFAULT_AGENT_EXECUTOR_WORKERS,
     Platform,
     _BUILTIN_PLATFORM_VALUES,
     GatewayConfig,
@@ -15500,8 +15501,13 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
                 raise RuntimeError("Gateway is shutting down; executor unavailable")
             executor = getattr(self, "_executor", None)
             if executor is None or getattr(executor, "_shutdown", False):
+                workers = getattr(
+                    getattr(self, "config", None),
+                    "agent_executor_workers",
+                    DEFAULT_AGENT_EXECUTOR_WORKERS,
+                )
                 executor = concurrent.futures.ThreadPoolExecutor(
-                    max_workers=10,
+                    max_workers=workers,
                     thread_name_prefix="hermes-gateway",
                 )
                 self._executor = executor
