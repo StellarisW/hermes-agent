@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1600, initial-scale=1">
+<title>Event-loop watchdog recovery</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { width: 1600px; height: 900px; margin: 0; overflow: hidden; background: #08111f; }
+  body { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  svg { display: block; width: 1600px; height: 900px; }
+  .title { font-size: 46px; font-weight: 760; letter-spacing: -1.2px; fill: #f4f8ff; }
+  .subtitle { font-size: 23px; font-weight: 460; fill: #b8c6d9; }
+  .eyebrow { font-size: 18px; font-weight: 720; letter-spacing: 1.8px; fill: #78b8ff; }
+  .panel-title { font-size: 26px; font-weight: 730; fill: #f4f8ff; }
+  .panel-copy { font-size: 21px; font-weight: 470; fill: #c5d0df; }
+  .small { font-size: 19px; font-weight: 500; fill: #b4c2d3; }
+  .tiny { font-size: 18px; font-weight: 560; fill: #9cadc1; }
+  .code { font: 650 18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #d9e7f7; }
+  .state { font-size: 24px; font-weight: 760; fill: #f7faff; letter-spacing: .3px; }
+  .metric { font-size: 31px; font-weight: 800; fill: #f8fbff; }
+  .metric-label { font-size: 18px; font-weight: 580; fill: #c1cfdf; }
+  .arrow-label { font-size: 17px; font-weight: 700; fill: #c6d5e7; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1600 900" role="img" aria-labelledby="title desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="title">Event-loop watchdog recovery after transient stalls</title>
+  <desc id="desc">Two timelines distinguish a late callback that renews the systemd watchdog lease from a missing callback that lets WatchdogSec restart the gateway. A three-state recovery machine requires two consecutive timely callbacks before returning to healthy.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#08111f"/>
+      <stop offset="1" stop-color="#0d1930"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="0" r="90%">
+      <stop offset="0" stop-color="#1a4b79" stop-opacity=".28"/>
+      <stop offset=".58" stop-color="#0b1729" stop-opacity=".06"/>
+      <stop offset="1" stop-color="#08111f" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#8ab4df" stroke-opacity=".045" stroke-width="1"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000814" flood-opacity=".38"/>
+    </filter>
+    <marker id="arrow-blue" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M1 1L11 6L1 11Z" fill="#58a6ff"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M1 1L11 6L1 11Z" fill="#e3b341"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M1 1L11 6L1 11Z" fill="#3fb950"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M1 1L11 6L1 11Z" fill="#ff6b6b"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+
+  <!-- Header -->
+  <g>
+    <text x="64" y="54" class="eyebrow">SYSTEMD WATCHDOG · PR #67051</text>
+    <text x="64" y="106" class="title">RECOVER A RESUMED LOOP. RESTART A STALLED LOOP.</text>
+    <text x="64" y="140" class="subtitle">The boundary is observable: a callback that runs proves progress; a callback that never runs sends no heartbeat.</text>
+    <g transform="translate(1290,34)">
+      <rect width="246" height="40" rx="20" fill="#102743" stroke="#2e70aa"/>
+      <circle cx="22" cy="20" r="6" fill="#58a6ff"/>
+      <text x="39" y="26" class="tiny" fill="#cfe6ff">No new task or cadence</text>
+    </g>
+  </g>
+
+  <!-- Timeline panels -->
+  <g filter="url(#shadow)">
+    <rect x="64" y="174" width="718" height="240" rx="22" fill="#101b2d" stroke="#2d4663"/>
+    <rect x="818" y="174" width="718" height="240" rx="22" fill="#101b2d" stroke="#4b3540"/>
+  </g>
+
+  <!-- Late callback panel -->
+  <g>
+    <rect x="88" y="194" width="164" height="32" rx="16" fill="#4b3a13" stroke="#9c7720"/>
+    <circle cx="108" cy="210" r="6" fill="#e3b341"/>
+    <text x="124" y="216" class="tiny" fill="#ffe28a">LATE CALLBACK</text>
+    <text x="88" y="258" class="panel-title">The callback executes</text>
+    <text x="88" y="286" class="panel-copy">Late means delayed—not dead.</text>
+
+    <line x1="110" y1="326" x2="714" y2="326" stroke="#52677f" stroke-width="4" stroke-linecap="round"/>
+    <line x1="110" y1="312" x2="110" y2="340" stroke="#58a6ff" stroke-width="3"/>
+    <circle cx="110" cy="326" r="7" fill="#58a6ff"/>
+    <text x="88" y="363" class="tiny">scheduled</text>
+
+    <circle cx="400" cy="326" r="11" fill="#e3b341" stroke="#ffe28a" stroke-width="3"/>
+    <text x="323" y="307" class="arrow-label" fill="#ffe28a">runs late</text>
+
+    <line x1="704" y1="302" x2="704" y2="350" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="5 5"/>
+    <text x="616" y="363" class="tiny" fill="#f0a0a0">WatchdogSec</text>
+
+    <g transform="translate(208,344)">
+      <rect width="370" height="46" rx="12" fill="#143451" stroke="#3676aa"/>
+      <text x="20" y="29" class="code">WATCHDOG=1 + STATUS=degraded</text>
+    </g>
+    <text x="88" y="400" class="small" fill="#69d17b">Lease renewed · notifier stays alive</text>
+  </g>
+
+  <!-- Hard stall panel -->
+  <g>
+    <rect x="842" y="194" width="142" height="32" rx="16" fill="#4a2027" stroke="#a5424f"/>
+    <circle cx="862" cy="210" r="6" fill="#ff6b6b"/>
+    <text x="878" y="216" class="tiny" fill="#ffb3ba">NO CALLBACK</text>
+    <text x="842" y="258" class="panel-title">The callback never runs</text>
+    <text x="842" y="286" class="panel-copy">The loop cannot schedule its notifier.</text>
+
+    <line x1="864" y1="326" x2="1468" y2="326" stroke="#52677f" stroke-width="4" stroke-linecap="round"/>
+    <line x1="864" y1="312" x2="864" y2="340" stroke="#58a6ff" stroke-width="3"/>
+    <circle cx="864" cy="326" r="7" fill="#58a6ff"/>
+    <text x="842" y="363" class="tiny">scheduled</text>
+
+    <path d="M930 326H1418" stroke="#ff6b6b" stroke-opacity=".5" stroke-width="3" stroke-dasharray="8 10"/>
+    <text x="1054" y="307" class="arrow-label" fill="#f29ba5">no application progress</text>
+
+    <line x1="1426" y1="298" x2="1426" y2="354" stroke="#ff6b6b" stroke-width="4"/>
+    <circle cx="1426" cy="326" r="12" fill="#391923" stroke="#ff6b6b" stroke-width="3"/>
+    <path d="M1420 320L1432 332M1432 320L1420 332" stroke="#ffb3ba" stroke-width="3" stroke-linecap="round"/>
+    <text x="1338" y="378" class="tiny" fill="#f0a0a0">WatchdogSec</text>
+
+    <g transform="translate(949,344)">
+      <rect width="322" height="46" rx="12" fill="#3b1c26" stroke="#a5424f"/>
+      <text x="26" y="29" class="code" fill="#ffd0d5">No sd_notify packet</text>
+    </g>
+    <text x="842" y="400" class="small" fill="#ff9ca6">systemd expires the lease → restarts gateway</text>
+  </g>
+
+  <!-- Recovery state machine -->
+  <g>
+    <rect x="64" y="430" width="1472" height="240" rx="22" fill="#0d1829" stroke="#29405a"/>
+    <text x="88" y="464" class="eyebrow">RECOVERY HYSTERESIS</text>
+    <text x="360" y="464" class="small">Two timely callbacks prevent one lucky wake-up from hiding recurring starvation.</text>
+
+    <!-- States -->
+    <g filter="url(#shadow)">
+      <rect x="100" y="504" width="322" height="96" rx="18" fill="#163522" stroke="#3fb950" stroke-width="2"/>
+      <rect x="628" y="504" width="344" height="96" rx="18" fill="#3a3016" stroke="#e3b341" stroke-width="2"/>
+      <rect x="1158" y="504" width="342" height="96" rx="18" fill="#3a3016" stroke="#e3b341" stroke-width="2"/>
+    </g>
+
+    <circle cx="130" cy="534" r="10" fill="#3fb950"/>
+    <text x="152" y="542" class="state">HEALTHY</text>
+    <text x="130" y="576" class="code">timely → WATCHDOG=1</text>
+
+    <circle cx="658" cy="534" r="10" fill="#e3b341"/>
+    <text x="680" y="542" class="state">DEGRADED · STREAK 0</text>
+    <text x="658" y="576" class="code">WATCHDOG=1 + STATUS=degraded</text>
+
+    <circle cx="1188" cy="534" r="10" fill="#e3b341"/>
+    <text x="1210" y="542" class="state">DEGRADED · STREAK 1</text>
+    <text x="1188" y="576" class="code">WATCHDOG=1</text>
+
+    <!-- Main transitions -->
+    <path d="M422 552H612" fill="none" stroke="#e3b341" stroke-width="4" marker-end="url(#arrow-amber)"/>
+    <text x="452" y="534" class="arrow-label" fill="#ffe28a">late callback</text>
+
+    <path d="M972 552H1142" fill="none" stroke="#58a6ff" stroke-width="4" marker-end="url(#arrow-blue)"/>
+    <text x="1003" y="534" class="arrow-label" fill="#add7ff">timely #1</text>
+
+    <!-- Timely #2 returns to healthy -->
+    <path d="M1328 600C1328 648 1130 648 810 648C490 648 260 648 260 608" fill="none" stroke="#3fb950" stroke-width="4" marker-end="url(#arrow-green)"/>
+    <rect x="594" y="620" width="412" height="36" rx="18" fill="#102a1a" stroke="#2f7d42"/>
+    <text x="619" y="644" class="arrow-label" fill="#92e5a2">timely #2 · WATCHDOG=1 + STATUS=healthy</text>
+
+    <!-- Late reset during recovery -->
+    <path d="M1308 504C1308 474 1120 474 972 496" fill="none" stroke="#ff6b6b" stroke-width="3" marker-end="url(#arrow-red)"/>
+    <rect x="1010" y="468" width="292" height="30" rx="15" fill="#351a23" stroke="#8f3948"/>
+    <text x="1028" y="489" class="arrow-label" fill="#ff9ca6">late again → reset streak to 0</text>
+  </g>
+
+  <!-- Evidence strip -->
+  <g>
+    <text x="64" y="704" class="eyebrow">VERIFIED BOUNDARY</text>
+    <text x="270" y="704" class="small">Real AF_UNIX notify socket · production notify() path</text>
+
+    <g transform="translate(64,722)">
+      <rect width="462" height="78" rx="18" fill="#132a43" stroke="#58a6ff" stroke-width="2"/>
+      <text x="24" y="34" class="metric" fill="#78b8ff">20 / 20</text>
+      <text x="158" y="32" class="metric-label">transient stalls recovered</text>
+      <text x="24" y="59" class="small">degraded → two timely callbacks → healthy</text>
+    </g>
+
+    <g transform="translate(568,722)">
+      <rect width="462" height="78" rx="18" fill="#3d202b" stroke="#ff6b6b" stroke-width="2"/>
+      <text x="24" y="34" class="metric" fill="#ff9ca6">0</text>
+      <text x="70" y="32" class="metric-label">WATCHDOG=1 packets in hard stall</text>
+      <text x="24" y="59" class="small">500 ms while the child loop stayed blocked</text>
+    </g>
+
+    <g transform="translate(1072,722)">
+      <rect width="464" height="78" rx="18" fill="#183a24" stroke="#3fb950" stroke-width="2"/>
+      <text x="24" y="34" class="metric" fill="#70db84">9,646</text>
+      <text x="146" y="32" class="metric-label">gateway tests passed</text>
+      <text x="24" y="59" class="small">489 files · 0 failed · required CI passed</text>
+    </g>
+  </g>
+</svg>
+</body>
+</html>
