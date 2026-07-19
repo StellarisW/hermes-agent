@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="t d">
+<style><![CDATA[
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: #07101f; }
+  svg { display: block; width: 1600px; height: 900px; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .eyebrow { font-size: 14px; font-weight: 800; letter-spacing: 2px; }
+  .title { font-size: 47px; font-weight: 850; letter-spacing: -1.1px; }
+  .subtitle { font-size: 20px; fill: #a9bad5; }
+  .section { font-size: 14px; font-weight: 850; letter-spacing: 1.4px; }
+  .node-title { font-size: 23px; font-weight: 820; }
+  .node-sub { font-size: 16px; fill: #b9c7dd; }
+  .code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 16px; font-weight: 700; }
+  .small { font-size: 14px; fill: #9eb0ca; }
+  .branch { font-size: 14px; font-weight: 850; }
+  .card-title { font-size: 18px; font-weight: 800; }
+  .card-text { font-size: 14px; fill: #aebed4; }
+]]></style>
+  <title id="t">Preserve the transformed final after reconnect</title>
+  <desc id="d">A gateway delivery flow showing a streamed preview owned by an old adapter, a reconnect, a plugin-transformed final response edited through the stream consumer so thread metadata is preserved, and a decision: successful old-message edits suppress duplicate delivery while failed edits keep normal final delivery pending for the live replacement adapter.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#07101f"/><stop offset=".58" stop-color="#0a1427"/><stop offset="1" stop-color="#111a31"/></linearGradient>
+    <radialGradient id="glowBlue" cx="30%" cy="30%" r="70%"><stop offset="0" stop-color="#2094ff" stop-opacity=".15"/><stop offset="1" stop-color="#2094ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glowPurple" cx="72%" cy="42%" r="58%"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".13"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#2b3d5f" stroke-width="1"/></pattern>
+    <filter id="shadow" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000" flood-opacity=".34"/></filter>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L12 6L0 12Z" fill="#4aa8ff"/></marker>
+    <marker id="arrowGreen" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L12 6L0 12Z" fill="#4ee0a0"/></marker>
+    <marker id="arrowOrange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L12 6L0 12Z" fill="#ffaf4a"/></marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glowBlue)"/>
+  <rect width="1600" height="900" fill="url(#glowPurple)"/>
+  <rect width="1600" height="900" fill="url(#grid)" opacity=".28"/>
+
+  <!-- Header -->
+  <g transform="translate(82 54)">
+    <text class="eyebrow" fill="#54b4ff">GATEWAY DELIVERY INVARIANT · RECONNECT</text>
+    <text class="title" y="60" fill="#f3f7ff">Preserve the transformed final after reconnect</text>
+    <text class="subtitle" y="99">A failed edit on the stale preview is not delivery proof — keep the normal final send enabled.</text>
+  </g>
+
+  <!-- Connectors rendered behind nodes -->
+  <path d="M378 294H426" fill="none" stroke="#4aa8ff" stroke-width="4" marker-end="url(#arrowBlue)"/>
+  <path d="M726 294H774" fill="none" stroke="#8e7cff" stroke-width="4" marker-end="url(#arrowBlue)"/>
+  <path d="M1114 294H1220" fill="none" stroke="#4aa8ff" stroke-width="4" marker-end="url(#arrowBlue)"/>
+  <!-- success branch -->
+  <path d="M1340 390V433" fill="none" stroke="#4ee0a0" stroke-width="4" marker-end="url(#arrowGreen)"/>
+  <!-- failure branch routed around every card -->
+  <path d="M1460 294H1548V648H1438" fill="none" stroke="#ffaf4a" stroke-width="4" marker-end="url(#arrowOrange)"/>
+  <path d="M1038 648H977" fill="none" stroke="#ffaf4a" stroke-width="4" marker-end="url(#arrowOrange)"/>
+  <path d="M587 648H526" fill="none" stroke="#4ee0a0" stroke-width="4" marker-end="url(#arrowGreen)"/>
+
+  <!-- Main row: preview -->
+  <g transform="translate(78 210)">
+    <rect width="300" height="168" rx="23" fill="#0e1c32" stroke="#3f8bd7" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="20" y="20" width="92" height="27" rx="14" fill="#163d67"/>
+    <text x="66" y="39" text-anchor="middle" class="eyebrow" fill="#65baff" style="letter-spacing:1.1px">STREAM</text>
+    <text x="22" y="82" class="node-title" fill="#edf6ff">Preview delivered</text>
+    <text x="22" y="114" class="code" fill="#70bcff">old adapter</text>
+    <text x="22" y="142" class="node-sub">owns the existing message ID</text>
+  </g>
+  <text x="402" y="194" text-anchor="middle" class="small">transport dies</text>
+
+  <!-- Main row: reconnect -->
+  <g transform="translate(426 210)">
+    <rect width="300" height="168" rx="23" fill="#151b35" stroke="#8b76f9" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="20" y="20" width="108" height="27" rx="14" fill="#302662"/>
+    <text x="74" y="39" text-anchor="middle" class="eyebrow" fill="#b4a5ff" style="letter-spacing:1.1px">RECONNECT</text>
+    <text x="22" y="82" class="node-title" fill="#f2efff">Replacement published</text>
+    <text x="22" y="114" class="code" fill="#b9adff">runner.adapters</text>
+    <text x="22" y="142" class="node-sub">new-message delivery is live</text>
+  </g>
+  <text x="750" y="194" text-anchor="middle" class="small">turn ends</text>
+
+  <!-- Main row: transformed final -->
+  <g transform="translate(774 210)">
+    <rect width="340" height="168" rx="23" fill="#142137" stroke="#42c3d5" stroke-width="2" filter="url(#shadow)"/>
+    <rect x="20" y="20" width="140" height="27" rx="14" fill="#174352"/>
+    <text x="90" y="39" text-anchor="middle" class="eyebrow" fill="#67d9e7" style="letter-spacing:1.1px">PLUGIN FINAL</text>
+    <text x="22" y="82" class="node-title" fill="#effcff">Final text transformed</text>
+    <text x="22" y="114" class="code" fill="#69d9e6">transform_llm_output</text>
+    <text x="22" y="142" class="node-sub">consumer helper keeps thread metadata</text>
+  </g>
+
+  <!-- Decision -->
+  <g transform="translate(1340 294)">
+    <path d="M0 -96L120 0L0 96L-120 0Z" fill="#17233b" stroke="#72a7e8" stroke-width="2.5" filter="url(#shadow)"/>
+    <text x="0" y="-23" text-anchor="middle" class="section" fill="#8fc5ff">CONSUMER EDIT</text>
+    <text x="0" y="12" text-anchor="middle" class="node-title" fill="#eef6ff">success?</text>
+    <text x="0" y="41" text-anchor="middle" class="small">SendResult.success</text>
+  </g>
+
+  <!-- True branch -->
+  <rect x="1362" y="402" width="68" height="26" rx="13" fill="#153f36" stroke="#2a856a"/>
+  <text x="1396" y="421" text-anchor="middle" class="branch" fill="#61e4aa">TRUE</text>
+  <g transform="translate(1086 446)">
+    <rect width="400" height="112" rx="21" fill="#102d2a" stroke="#3fd59a" stroke-width="2.4" filter="url(#shadow)"/>
+    <text x="24" y="37" class="section" fill="#61e4aa">DELIVERY CONFIRMED</text>
+    <text x="24" y="72" class="node-title" fill="#effff8">Set already_sent = true</text>
+    <text x="24" y="98" class="node-sub">same preview updated · no duplicate final</text>
+  </g>
+
+  <!-- False branch labels -->
+  <rect x="1466" y="404" width="76" height="26" rx="13" fill="#55351a" stroke="#9c6024"/>
+  <text x="1504" y="423" text-anchor="middle" class="branch" fill="#ffc06c">FALSE</text>
+  <text x="1570" y="535" transform="rotate(90 1570 535)" text-anchor="middle" class="small" fill="#e6ad68">normal final send stays enabled</text>
+
+  <!-- False flow, right to left -->
+  <g transform="translate(1038 588)">
+    <rect width="400" height="120" rx="21" fill="#352416" stroke="#f3a23e" stroke-width="2.4" filter="url(#shadow)"/>
+    <text x="24" y="38" class="section" fill="#ffbd68">EDIT FAILED · NOT CONNECTED</text>
+    <text x="24" y="73" class="node-title" fill="#fff6e9">Do not set already_sent</text>
+    <text x="24" y="101" class="node-sub">old message ID stays with old adapter</text>
+  </g>
+
+  <g transform="translate(587 588)">
+    <rect width="390" height="120" rx="21" fill="#122744" stroke="#4ba9ff" stroke-width="2.4" filter="url(#shadow)"/>
+    <text x="24" y="38" class="section" fill="#65baff">NORMAL FINAL-SEND</text>
+    <text x="24" y="73" class="code" fill="#7bc4ff">_final_delivery_adapter()</text>
+    <text x="24" y="101" class="node-sub">re-resolves the live replacement</text>
+  </g>
+
+  <g transform="translate(126 588)">
+    <rect width="400" height="120" rx="21" fill="#102d2a" stroke="#3fd59a" stroke-width="2.4" filter="url(#shadow)"/>
+    <text x="24" y="38" class="section" fill="#61e4aa">REPLACEMENT SEND</text>
+    <text x="24" y="73" class="node-title" fill="#effff8">Complete transformed final</text>
+    <text x="24" y="101" class="node-sub">new message · content preserved</text>
+  </g>
+
+  <!-- Safety contract -->
+  <g transform="translate(82 752)">
+    <text class="section" fill="#7e9fc8">SAFETY CONTRACT</text>
+    <g transform="translate(0 24)">
+      <rect width="440" height="92" rx="18" fill="#0d1a2e" stroke="#2d4f77" stroke-width="1.7"/>
+      <circle cx="31" cy="29" r="13" fill="#183e68"/><text x="31" y="35" text-anchor="middle" font-size="17" font-weight="850" fill="#68baff">1</text>
+      <text x="56" y="34" class="card-title" fill="#eaf5ff">Old IDs and routing stay together</text>
+      <text x="24" y="66" class="card-text">Consumer helper forwards metadata on the old adapter.</text>
+    </g>
+    <g transform="translate(464 24)">
+      <rect width="440" height="92" rx="18" fill="#0d1a2e" stroke="#2d4f77" stroke-width="1.7"/>
+      <circle cx="31" cy="29" r="13" fill="#173e35"/><text x="31" y="35" text-anchor="middle" font-size="17" font-weight="850" fill="#60e0a7">2</text>
+      <text x="56" y="34" class="card-title" fill="#effff8">Success is the only delivery proof</text>
+      <text x="24" y="66" class="card-text">Only success=true may suppress the normal final send.</text>
+    </g>
+    <g transform="translate(928 24)">
+      <rect width="440" height="92" rx="18" fill="#0d1a2e" stroke="#2d4f77" stroke-width="1.7"/>
+      <circle cx="31" cy="29" r="13" fill="#4d3218"/><text x="31" y="35" text-anchor="middle" font-size="17" font-weight="850" fill="#ffbd68">3</text>
+      <text x="56" y="34" class="card-title" fill="#fff7eb">Failure preserves the final content</text>
+      <text x="24" y="66" class="card-text">Fallback sends through the published replacement.</text>
+    </g>
+  </g>
+
+</svg>
