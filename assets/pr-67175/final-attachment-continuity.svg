@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Reconnect-safe final attachment delivery</title>
+  <desc id="desc">Before the fix, final text moves to a replacement adapter while TTS, images, media and local files remain stale-bound to the disconnected adapter. After the fix, existing message IDs stay with their creator, while every unsent payload resolves the live adapter before dispatch; failures collapse into one path-safe notice.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.55" stop-color="#0a1628"/>
+      <stop offset="1" stop-color="#07101c"/>
+    </linearGradient>
+    <linearGradient id="beforePanel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#251727"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="boundaryPanel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#10253a"/>
+      <stop offset="1" stop-color="#0d1928"/>
+    </linearGradient>
+    <linearGradient id="afterPanel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#102b2c"/>
+      <stop offset="1" stop-color="#0d1927"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000814" flood-opacity="0.34"/>
+    </filter>
+    <filter id="glowCyan" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#53d3ff" flood-opacity="0.28"/>
+    </filter>
+    <filter id="glowGreen" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#63e6a3" flood-opacity="0.25"/>
+    </filter>
+    <marker id="arrowMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7890a8"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff7185"/>
+    </marker>
+    <marker id="arrowCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#53d3ff"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#63e6a3"/>
+    </marker>
+    <style>
+      text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .eyebrow { font-size: 17px; font-weight: 700; letter-spacing: 2.2px; }
+      .section { font-size: 24px; font-weight: 800; letter-spacing: 0.4px; fill: #f5f8fc; }
+      .section-sub { font-size: 17px; font-weight: 500; fill: #9eb0c3; }
+      .card-title { font-size: 21px; font-weight: 750; fill: #f4f7fb; }
+      .card-copy { font-size: 17px; font-weight: 500; fill: #b8c5d3; }
+      .mini { font-size: 15px; font-weight: 650; fill: #aebccc; }
+      .chip { font-size: 16px; font-weight: 700; fill: #dfe8f2; }
+      .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <circle cx="1460" cy="55" r="220" fill="#163152" opacity="0.18"/>
+  <circle cx="130" cy="875" r="260" fill="#1a4950" opacity="0.12"/>
+  <path d="M0 158 H1600" stroke="#1b2c42" stroke-width="1"/>
+
+  <g aria-label="Header">
+    <rect x="64" y="40" width="382" height="32" rx="16" fill="#10253a" stroke="#244563"/>
+    <circle cx="84" cy="56" r="5" fill="#53d3ff"/>
+    <text x="100" y="62" class="eyebrow" fill="#8ddfff">HERMES GATEWAY · FINAL RESPONSE</text>
+    <text x="64" y="119" font-size="47" font-weight="820" fill="#f7f9fc">Final attachments survive adapter replacement</text>
+    <text x="64" y="148" font-size="20" font-weight="500" fill="#9fb1c4">Reconnect-safe delivery without migrating existing message ownership</text>
+  </g>
+
+  <!-- Panel backgrounds sit below connectors; cards and labels sit above. -->
+  <g filter="url(#shadow)">
+    <rect x="60" y="186" width="430" height="566" rx="26" fill="url(#beforePanel)" stroke="#593044" stroke-width="2"/>
+    <rect x="535" y="186" width="530" height="566" rx="26" fill="url(#boundaryPanel)" stroke="#27567a" stroke-width="2"/>
+    <rect x="1110" y="186" width="430" height="566" rx="26" fill="url(#afterPanel)" stroke="#276951" stroke-width="2"/>
+  </g>
+
+  <!-- Connectors are drawn before cards so they remain behind content. -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- BEFORE flow -->
+    <path d="M274 376 V382" stroke="#7890a8" stroke-width="3" marker-end="url(#arrowMuted)"/>
+    <path d="M274 448 V458 H162 V466" stroke="#63e6a3" stroke-width="3" marker-end="url(#arrowGreen)"/>
+    <path d="M274 448 V458 H386 V466" stroke="#ff7185" stroke-width="3" marker-end="url(#arrowRed)"/>
+    <path d="M386 558 V592" stroke="#ff7185" stroke-width="3" marker-end="url(#arrowRed)"/>
+
+    <!-- OWNERSHIP lanes -->
+    <path d="M728 355 H850" stroke="#8ba2b9" stroke-width="3" marker-end="url(#arrowMuted)"/>
+    <path d="M728 478 H764" stroke="#53d3ff" stroke-width="3.5" marker-end="url(#arrowCyan)"/>
+    <path d="M908 477 H971" stroke="#63e6a3" stroke-width="3.5" marker-end="url(#arrowGreen)"/>
+    <path d="M650 623 H719" stroke="#53d3ff" stroke-width="3.5" marker-end="url(#arrowCyan)"/>
+    <path d="M840 623 H909" stroke="#53d3ff" stroke-width="3.5" marker-end="url(#arrowCyan)"/>
+    <path d="M970 657 V677 H607 V665" stroke="#53d3ff" stroke-width="3" stroke-dasharray="7 7" marker-end="url(#arrowCyan)"/>
+
+    <!-- AFTER flow -->
+    <path d="M1325 373 V399" stroke="#63e6a3" stroke-width="3.5" marker-end="url(#arrowGreen)"/>
+    <path d="M1325 477 V503" stroke="#63e6a3" stroke-width="3.5" marker-end="url(#arrowGreen)"/>
+    <path d="M1325 573 V590 H1219 V608" stroke="#63e6a3" stroke-width="3.5" marker-end="url(#arrowGreen)"/>
+    <path d="M1325 590 H1431 V608" stroke="#ffbd59" stroke-width="3.5" marker-end="url(#arrowMuted)"/>
+    <path d="M1431 680 V694" stroke="#ffbd59" stroke-width="3.5" marker-end="url(#arrowMuted)"/>
+  </g>
+
+  <!-- BEFORE PANEL -->
+  <rect x="84" y="211" width="95" height="29" rx="14.5" fill="#492033"/>
+  <text x="101" y="231" class="eyebrow" fill="#ff91a1">BEFORE</text>
+  <text x="84" y="272" class="section">One response, two adapters</text>
+  <text x="84" y="297" class="section-sub">Text recovers; native payloads stay stale-bound.</text>
+
+  <rect x="94" y="308" width="360" height="68" rx="16" fill="#111f31" stroke="#32475e"/>
+  <circle cx="126" cy="342" r="16" fill="#243b54"/>
+  <text x="120" y="349" font-size="18" font-weight="800" fill="#d9e4ef">A</text>
+  <text x="154" y="337" class="card-title">In-flight turn starts</text>
+  <text x="154" y="361" class="card-copy">handler captures adapter A as <tspan class="mono">self</tspan></text>
+
+  <rect x="94" y="390" width="360" height="58" rx="14" fill="#15263a" stroke="#32506d"/>
+  <text x="118" y="426" class="card-title">Runner publishes B</text>
+  <circle cx="424" cy="419" r="13" fill="#1b594b" stroke="#63e6a3"/>
+  <text x="419" y="425" font-size="15" font-weight="800" fill="#baf6d6">B</text>
+
+  <rect x="84" y="478" width="156" height="78" rx="16" fill="#102b29" stroke="#347c64"/>
+  <text x="106" y="507" class="card-title" fill="#d8f8e9">Final text</text>
+  <text x="106" y="534" class="card-copy" fill="#9edabb">resolves B ✓</text>
+
+  <rect x="308" y="478" width="156" height="78" rx="16" fill="#3a1d2a" stroke="#b84b64"/>
+  <text x="328" y="507" class="card-title" fill="#ffe0e5">Attachments</text>
+  <text x="328" y="534" class="card-copy" fill="#ffacb8">still call A</text>
+
+  <rect x="292" y="594" width="188" height="82" rx="16" fill="#3a1b28" stroke="#d45670" stroke-width="2"/>
+  <circle cx="320" cy="622" r="12" fill="#7b293e"/>
+  <path d="M314 616 L326 628 M326 616 L314 628" stroke="#ffd4db" stroke-width="2.5"/>
+  <text x="342" y="627" class="card-title">A offline</text>
+  <text x="314" y="656" class="card-copy">TTS · images · media</text>
+
+  <rect x="84" y="694" width="380" height="38" rx="12" fill="#2a1a27" stroke="#563146"/>
+  <text x="104" y="719" class="mini" fill="#eeb4bf">Stripped directives hide the attachment loss</text>
+
+  <!-- OWNERSHIP PANEL -->
+  <rect x="561" y="211" width="194" height="29" rx="14.5" fill="#173a56"/>
+  <text x="579" y="231" class="eyebrow" fill="#8ddfff">OWNERSHIP BOUNDARY</text>
+  <text x="561" y="272" class="section">Keep IDs. Move unsent work.</text>
+  <text x="561" y="297" class="section-sub">The handoff follows payload ownership—not turn ownership.</text>
+
+  <rect x="561" y="314" width="167" height="82" rx="16" fill="#151f2e" stroke="#42556a"/>
+  <text x="581" y="342" class="card-title">Existing state</text>
+  <text x="581" y="368" class="card-copy">preview ID · edit/delete</text>
+  <text x="581" y="389" class="mini">typing · ephemeral cleanup</text>
+
+  <rect x="868" y="314" width="169" height="82" rx="16" fill="#172432" stroke="#51657b"/>
+  <circle cx="896" cy="354" r="15" fill="#263b52"/>
+  <text x="890" y="360" font-size="17" font-weight="800" fill="#dbe7f2">A</text>
+  <text x="920" y="347" class="card-title">ID owner: A</text>
+  <text x="920" y="373" class="card-copy">IDs stay put</text>
+
+  <rect x="561" y="436" width="167" height="84" rx="16" fill="#10283a" stroke="#2f779f"/>
+  <text x="581" y="464" class="card-title">Unsent payloads</text>
+  <text x="581" y="490" class="card-copy">TTS · images · audio</text>
+  <text x="581" y="511" class="mini">video · documents</text>
+
+  <rect x="780" y="438" width="128" height="78" rx="16" fill="#12324a" stroke="#53d3ff" filter="url(#glowCyan)"/>
+  <text x="802" y="467" class="card-title" fill="#c9f2ff">Resolve live</text>
+  <text x="798" y="493" class="card-copy" fill="#9edff3">just before send</text>
+
+  <rect x="987" y="438" width="50" height="78" rx="16" fill="#12362f" stroke="#63e6a3" filter="url(#glowGreen)"/>
+  <text x="1004" y="471" font-size="20" font-weight="850" fill="#d8f9e9">B</text>
+  <text x="1002" y="495" font-size="15" font-weight="700" fill="#9be6bf">/ C</text>
+
+  <text x="561" y="565" class="eyebrow" fill="#8ddfff">BASE PER-IMAGE FALLBACK</text>
+  <rect x="561" y="589" width="89" height="68" rx="14" fill="#122538" stroke="#315977"/>
+  <text x="585" y="618" class="card-title">Delay</text>
+  <text x="576" y="642" class="mini">human pacing</text>
+  <rect x="735" y="589" width="105" height="68" rx="14" fill="#12324a" stroke="#53d3ff"/>
+  <text x="754" y="618" class="card-title">Resolve</text>
+  <text x="752" y="642" class="mini">latest adapter</text>
+  <rect x="925" y="589" width="90" height="68" rx="14" fill="#12362f" stroke="#63e6a3"/>
+  <text x="947" y="618" class="card-title">Send</text>
+  <text x="944" y="642" class="mini">then repeat</text>
+  <text x="759" y="674" class="mini" fill="#8ddfff">next item</text>
+
+  <rect x="561" y="695" width="476" height="37" rx="12" fill="#11283b" stroke="#28516d"/>
+  <text x="579" y="719" class="mini" fill="#a9d9ef">Overrides keep native batch · chunk · fallback</text>
+
+  <!-- AFTER PANEL -->
+  <rect x="1136" y="211" width="83" height="29" rx="14.5" fill="#174537"/>
+  <text x="1154" y="231" class="eyebrow" fill="#8df0bd">AFTER</text>
+  <text x="1136" y="272" class="section">Live handoff at each boundary</text>
+  <text x="1136" y="297" class="section-sub">A later reconnect cannot stale-bind pending work.</text>
+
+  <rect x="1150" y="305" width="350" height="68" rx="16" fill="#123129" stroke="#34795f"/>
+  <text x="1173" y="333" class="card-title">1 · Resolve final text</text>
+  <text x="1173" y="357" class="card-copy">send through the current adapter</text>
+
+  <rect x="1150" y="407" width="350" height="70" rx="16" fill="#123129" stroke="#34795f"/>
+  <text x="1173" y="436" class="card-title">2 · Resolve pending payloads</text>
+  <text x="1173" y="461" class="card-copy">again after pacing or a prior await</text>
+
+  <rect x="1150" y="511" width="350" height="62" rx="16" fill="#11283b" stroke="#377293"/>
+  <text x="1173" y="537" class="card-title">Replacement B → C during wait?</text>
+  <text x="1173" y="559" class="card-copy">the next unsent payload uses C</text>
+
+  <rect x="1137" y="616" width="164" height="64" rx="16" fill="#12362f" stroke="#63e6a3"/>
+  <text x="1160" y="643" class="card-title">Delivered</text>
+  <text x="1160" y="665" class="card-copy">continue pipeline</text>
+
+  <rect x="1349" y="616" width="164" height="64" rx="16" fill="#382c1f" stroke="#d39a42"/>
+  <text x="1371" y="643" class="card-title">Send failed</text>
+  <text x="1371" y="665" class="card-copy">record fixed kind</text>
+
+  <rect x="1280" y="702" width="233" height="30" rx="12" fill="#3a2c1e" stroke="#d39a42"/>
+  <text x="1300" y="723" class="mini" fill="#ffd99c">one generic path-safe notice</text>
+
+  <!-- Stable invariant footer -->
+  <g aria-label="Preserved invariants">
+    <text x="64" y="800" class="eyebrow" fill="#7890a8">PRESERVED INVARIANTS</text>
+    <rect x="64" y="822" width="270" height="46" rx="23" fill="#101d2d" stroke="#2a3e54"/>
+    <circle cx="88" cy="845" r="6" fill="#63e6a3"/>
+    <text x="105" y="851" class="chip">Primary + profile routing</text>
+
+    <rect x="350" y="822" width="255" height="46" rx="23" fill="#101d2d" stroke="#2a3e54"/>
+    <circle cx="374" cy="845" r="6" fill="#63e6a3"/>
+    <text x="391" y="851" class="chip">Reply + thread metadata</text>
+
+    <rect x="621" y="822" width="237" height="46" rx="23" fill="#101d2d" stroke="#2a3e54"/>
+    <circle cx="645" cy="845" r="6" fill="#63e6a3"/>
+    <text x="662" y="851" class="chip">TTS temp-file cleanup</text>
+
+    <rect x="874" y="822" width="310" height="46" rx="23" fill="#101d2d" stroke="#2a3e54"/>
+    <circle cx="898" cy="845" r="6" fill="#63e6a3"/>
+    <text x="915" y="851" class="chip">Telegram caption fallback</text>
+
+    <rect x="1200" y="822" width="336" height="46" rx="23" fill="#101d2d" stroke="#2a3e54"/>
+    <circle cx="1224" cy="845" r="6" fill="#63e6a3"/>
+    <text x="1241" y="851" class="chip mono">send_multiple_images() → None</text>
+  </g>
+</svg>
