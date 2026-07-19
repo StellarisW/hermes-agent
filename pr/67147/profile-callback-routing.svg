@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<style><![CDATA[
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: #08111f; }
+  body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  svg { display: block; width: 1600px; height: 900px; }
+  .title { font-size: 42px; font-weight: 760; letter-spacing: -1.2px; fill: #f4f8ff; }
+  .subtitle { font-size: 19px; font-weight: 450; fill: #9db0c9; }
+  .eyebrow { font-size: 13px; font-weight: 760; letter-spacing: 1.8px; }
+  .h2 { font-size: 23px; font-weight: 720; fill: #f4f8ff; }
+  .h3 { font-size: 17px; font-weight: 700; fill: #edf4ff; }
+  .body { font-size: 15px; font-weight: 470; fill: #b6c5d8; }
+  .small { font-size: 15px; font-weight: 500; fill: #a8b8cc; }
+  .code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 15px; font-weight: 600; }
+  .chip { font-size: 12px; font-weight: 760; letter-spacing: .9px; }
+  .route { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 14px; font-weight: 650; fill: #dbe8ff; }
+  .number { font-size: 20px; font-weight: 780; fill: #08111f; }
+]]></style>
+  <title id="title">Profile-scoped HTTP callback routing in a multiplexed Hermes gateway</title>
+  <desc id="desc">A shared API Server captures the process-primary profile before request scope. Primary callbacks use runner.adapters, non-primary callbacks use only their own profile registry, and missing adapters return 503 without cross-profile fallback.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#08111f"/>
+      <stop offset="1" stop-color="#0d1727"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#18304b" stroke-width="1" opacity="0.28"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="9" stdDeviation="12" flood-color="#020711" flood-opacity="0.42"/>
+    </filter>
+    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#47d7ff"/>
+    </marker>
+    <marker id="arrow-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a98cff"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ffad5c"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#55e6a5"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <circle cx="1510" cy="90" r="230" fill="#153c54" opacity="0.16"/>
+  <circle cx="90" cy="850" r="230" fill="#3d2c6f" opacity="0.12"/>
+
+  <!-- Header -->
+  <text x="68" y="70" class="eyebrow" fill="#47d7ff">HERMES GATEWAY · MULTIPLEX ISOLATION</text>
+  <text x="68" y="122" class="title">Route every callback to its owning profile</text>
+  <text x="68" y="158" class="subtitle">Stable process ownership + request-local scope + live registry lookup — with no cross-profile fallback.</text>
+  <g transform="translate(1288 58)">
+    <rect width="244" height="62" rx="15" fill="#101f32" stroke="#28445f"/>
+    <circle cx="31" cy="31" r="13" fill="#55e6a5" opacity="0.18"/>
+    <path d="M25 31 l4 4 8 -9" fill="none" stroke="#55e6a5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="54" y="27" class="small" fill="#9fb1c8">Isolation invariant</text>
+    <text x="54" y="46" class="h3" font-size="16">Owner only</text>
+  </g>
+
+  <!-- Arrows behind cards -->
+  <path d="M322 340 H400" fill="none" stroke="#47d7ff" stroke-width="3" marker-end="url(#arrow-cyan)"/>
+  <path d="M748 340 H806" fill="none" stroke="#47d7ff" stroke-width="3" marker-end="url(#arrow-cyan)"/>
+  <path d="M939 295 C1000 295 984 265 1045 265" fill="none" stroke="#47d7ff" stroke-width="3" marker-end="url(#arrow-cyan)"/>
+  <path d="M939 385 C998 385 986 486 1045 486" fill="none" stroke="#a98cff" stroke-width="3" marker-end="url(#arrow-violet)"/>
+  <path d="M1266 265 H1321" fill="none" stroke="#55e6a5" stroke-width="3" marker-end="url(#arrow-green)"/>
+  <path d="M1266 486 H1321" fill="none" stroke="#55e6a5" stroke-width="3" marker-end="url(#arrow-green)"/>
+  <path d="M1045 310 H1014 V646 H1045" fill="none" stroke="#ffad5c" stroke-width="3" marker-end="url(#arrow-orange)"/>
+  <path d="M1155 568 V600" fill="none" stroke="#ffad5c" stroke-width="3" marker-end="url(#arrow-orange)"/>
+
+  <!-- Input card -->
+  <g filter="url(#shadow)">
+    <rect x="62" y="225" width="260" height="235" rx="22" fill="#101d2d" stroke="#25415c" stroke-width="1.5"/>
+  </g>
+  <rect x="82" y="247" width="102" height="27" rx="13.5" fill="#14354a"/>
+  <text x="97" y="266" class="chip" fill="#66ddff">INGRESS</text>
+  <text x="82" y="309" class="h2">Platform callback</text>
+  <text x="82" y="344" class="route">/api/platforms/…</text>
+  <text x="82" y="377" class="route">/p/{profile}/api/…</text>
+  <line x1="82" y1="401" x2="302" y2="401" stroke="#294158"/>
+  <text x="82" y="428" class="small">Prefix selects the request profile.</text>
+
+  <!-- Listener card -->
+  <g filter="url(#shadow)">
+    <rect x="400" y="205" width="348" height="270" rx="24" fill="#102236" stroke="#2b5f7e" stroke-width="1.6"/>
+  </g>
+  <rect x="422" y="227" width="137" height="27" rx="13.5" fill="#153e56"/>
+  <text x="438" y="246" class="chip" fill="#66ddff">SHARED LISTENER</text>
+  <text x="422" y="290" class="h2">API Server</text>
+  <g transform="translate(422 315)">
+    <rect width="304" height="59" rx="14" fill="#0b1827" stroke="#24435c"/>
+    <circle cx="29" cy="29" r="15" fill="#47d7ff"/>
+    <text x="23" y="36" class="number">1</text>
+    <text x="56" y="24" class="small">Capture once, before middleware</text>
+    <text x="56" y="44" class="code" fill="#c8efff">process-primary = coder</text>
+  </g>
+  <g transform="translate(422 385)">
+    <rect width="304" height="67" rx="14" fill="#0b1827" stroke="#24435c"/>
+    <circle cx="29" cy="33" r="15" fill="#a98cff"/>
+    <text x="23" y="40" class="number">2</text>
+    <text x="56" y="27" class="small">Scope each request independently</text>
+    <text x="56" y="48" class="code" fill="#ded4ff">ContextVar = target profile</text>
+  </g>
+
+  <!-- Decision -->
+  <g filter="url(#shadow)">
+    <path d="M880 256 L945 340 L880 424 L815 340 Z" fill="#132a40" stroke="#4e7597" stroke-width="1.8"/>
+  </g>
+  <text x="880" y="318" text-anchor="middle" class="small">TARGET IS</text>
+  <text x="880" y="344" text-anchor="middle" class="h3">process-primary?</text>
+  <text x="880" y="370" text-anchor="middle" class="small">or no prefix</text>
+  <rect x="965" y="242" width="77" height="25" rx="12.5" fill="#153e56"/>
+  <text x="984" y="259" class="chip" fill="#66ddff">YES</text>
+  <rect x="964" y="440" width="78" height="25" rx="12.5" fill="#352b59"/>
+  <text x="983" y="457" class="chip" fill="#c4b2ff">NO</text>
+
+  <!-- Primary registry -->
+  <g filter="url(#shadow)">
+    <rect x="1045" y="195" width="221" height="140" rx="20" fill="#10283b" stroke="#3aaacb" stroke-width="1.7"/>
+  </g>
+  <rect x="1065" y="214" width="91" height="24" rx="12" fill="#17445b"/>
+  <text x="1081" y="231" class="chip" fill="#66ddff">PRIMARY</text>
+  <text x="1065" y="272" class="h3">runner.adapters</text>
+  <text x="1065" y="299" class="small">Owned by captured</text>
+  <text x="1065" y="318" class="small">process-primary profile</text>
+
+  <!-- Secondary registry -->
+  <g filter="url(#shadow)">
+    <rect x="1045" y="405" width="221" height="163" rx="20" fill="#211d3a" stroke="#8068cf" stroke-width="1.7"/>
+  </g>
+  <rect x="1065" y="424" width="116" height="24" rx="12" fill="#3a3062"/>
+  <text x="1080" y="441" class="chip" fill="#cbbcff">NON-PRIMARY</text>
+  <text x="1065" y="480" class="h3">_profile_adapters</text>
+  <text x="1065" y="506" class="code" fill="#ded4ff">[target profile]</text>
+  <text x="1065" y="535" class="small">Live lookup on every callback</text>
+  <text x="1065" y="553" class="small">No fallback to primary</text>
+
+  <!-- Dispatch -->
+  <g filter="url(#shadow)">
+    <rect x="1321" y="214" width="217" height="318" rx="22" fill="#102a28" stroke="#35a979" stroke-width="1.7"/>
+  </g>
+  <rect x="1342" y="234" width="93" height="25" rx="12.5" fill="#164739"/>
+  <text x="1359" y="252" class="chip" fill="#68edb0">OWNER</text>
+  <text x="1342" y="296" class="h2">Verify</text>
+  <text x="1342" y="321" class="small">Use only the target adapter's</text>
+  <text x="1342" y="341" class="small">platform credentials.</text>
+  <line x1="1342" y1="365" x2="1516" y2="365" stroke="#285347"/>
+  <text x="1342" y="407" class="h2">Dispatch</text>
+  <text x="1342" y="432" class="small">Deliver into the owning</text>
+  <text x="1342" y="452" class="small">profile's runtime.</text>
+  <g transform="translate(1342 475)">
+    <rect width="174" height="35" rx="11" fill="#163e35"/>
+    <circle cx="19" cy="17.5" r="7" fill="#55e6a5"/>
+    <text x="36" y="23" class="code" fill="#bdf9da">200 target owner</text>
+  </g>
+
+  <!-- Fail closed -->
+  <g filter="url(#shadow)">
+    <rect x="1045" y="600" width="493" height="94" rx="19" fill="#352317" stroke="#bf7534" stroke-width="1.6"/>
+  </g>
+  <circle cx="1075" cy="630" r="13" fill="#ffad5c"/>
+  <text x="1071" y="636" class="number">!</text>
+  <text x="1098" y="634" class="h3">Missing selected adapter</text>
+  <text x="1098" y="660" class="code" fill="#ffd2a1">503 platform_unavailable</text>
+  <text x="1098" y="683" class="small">Fail closed · zero cross-profile calls</text>
+
+  <!-- Bottom examples and invariants -->
+  <rect x="62" y="535" width="686" height="155" rx="22" fill="#0d1a29" stroke="#243b53"/>
+  <text x="84" y="566" class="eyebrow" fill="#8fa3bd">NAMED-PRIMARY EXAMPLE · PRIMARY = CODER</text>
+  <g transform="translate(84 588)">
+    <rect width="195" height="73" rx="15" fill="#10283b" stroke="#28647f"/>
+    <text x="16" y="28" class="route">/p/coder/…</text>
+    <text x="16" y="52" class="small">→ runner.adapters</text>
+  </g>
+  <g transform="translate(298 588)">
+    <rect width="206" height="73" rx="15" fill="#211d3a" stroke="#6654a7"/>
+    <text x="16" y="28" class="route">/p/default/…</text>
+    <text x="16" y="52" class="small">→ _profile_adapters[default]</text>
+  </g>
+  <g transform="translate(523 588)">
+    <rect width="203" height="73" rx="15" fill="#122721" stroke="#2d7d5e"/>
+    <text x="16" y="28" class="route">/api/platforms/…</text>
+    <text x="16" y="52" class="small">→ runner.adapters</text>
+  </g>
+
+  <text x="62" y="711" class="eyebrow" fill="#8fa3bd">SAFETY CONTRACT</text>
+  <g transform="translate(62 728)">
+    <rect width="470" height="86" rx="18" fill="#0f1c2c" stroke="#263d57"/>
+    <circle cx="29" cy="43" r="14" fill="#47d7ff" opacity="0.95"/>
+    <text x="24" y="49" class="number">1</text>
+    <text x="54" y="35" class="h3">Stable owner identity</text>
+    <text x="54" y="62" class="small">Process home is captured before request scope.</text>
+  </g>
+  <g transform="translate(552 728)">
+    <rect width="470" height="86" rx="18" fill="#0f1c2c" stroke="#263d57"/>
+    <circle cx="29" cy="43" r="14" fill="#a98cff" opacity="0.95"/>
+    <text x="24" y="49" class="number">2</text>
+    <text x="54" y="35" class="h3">Fresh registry state</text>
+    <text x="54" y="62" class="small">Reconnect replacement is visible on the next callback.</text>
+  </g>
+  <g transform="translate(1042 728)">
+    <rect width="496" height="86" rx="18" fill="#0f1c2c" stroke="#263d57"/>
+    <circle cx="29" cy="43" r="14" fill="#ffad5c" opacity="0.95"/>
+    <text x="24" y="49" class="number">3</text>
+    <text x="54" y="35" class="h3">Fail closed</text>
+    <text x="54" y="62" class="small">Absent profile adapter never borrows another profile.</text>
+  </g>
+</svg>
