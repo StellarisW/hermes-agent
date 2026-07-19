@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Configurable gateway agent executor capacity</title>
+  <desc id="desc">The gateway agent executor worker setting flows from config.yaml through validation and GatewayConfig into a lazily created ThreadPoolExecutor. Missing or invalid values preserve the historical default of ten. Executor capacity and cross-surface session admission remain separate controls. Changing worker capacity requires a gateway restart and higher values trade less queueing for greater resource and provider pressure.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.58" stop-color="#0a1628"/>
+      <stop offset="1" stop-color="#10172a"/>
+    </linearGradient>
+    <linearGradient id="headerGlow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity="0.18"/>
+      <stop offset="0.52" stop-color="#8b5cf6" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#34d399" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="flowLine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="0.52" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#34d399"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" fill="none" stroke="#8ca4c5" stroke-opacity="0.055" stroke-width="1"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000814" flood-opacity="0.48"/>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M1 1L11 6L1 11Z" fill="#8bcdf3"/>
+    </marker>
+    <style>
+      .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+      .eyebrow { font-size: 17px; font-weight: 750; letter-spacing: 2.1px; }
+      .title { font-size: 49px; font-weight: 780; letter-spacing: -1.3px; }
+      .subtitle { font-size: 21px; font-weight: 430; }
+      .cardTitle { font-size: 19px; font-weight: 760; letter-spacing: 1.25px; }
+      .nodeTitle { font-size: 25px; font-weight: 740; letter-spacing: -0.25px; }
+      .body { font-size: 19px; font-weight: 440; }
+      .small { font-size: 17px; font-weight: 440; }
+      .tiny { font-size: 15px; font-weight: 520; }
+      .code { font-size: 18px; font-weight: 540; }
+      .label { font-size: 16px; font-weight: 700; letter-spacing: .35px; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <ellipse cx="300" cy="35" rx="420" ry="240" fill="#0ea5e9" opacity="0.055"/>
+  <ellipse cx="1405" cy="175" rx="360" ry="300" fill="#8b5cf6" opacity="0.05"/>
+  <rect x="0" y="0" width="1600" height="145" fill="url(#headerGlow)"/>
+  <path d="M0 144H1600" stroke="#8ca4c5" stroke-opacity="0.15"/>
+
+  <!-- Header -->
+  <g class="sans">
+    <g transform="translate(70 30)">
+      <path d="M16 0L30 8V24L16 32L2 24V8Z" fill="none" stroke="#38bdf8" stroke-width="2.2"/>
+      <path d="M9 9V23M23 9V23M9 16H23" stroke="#d7f2ff" stroke-width="2.2" stroke-linecap="round"/>
+      <text x="45" y="22" class="eyebrow" fill="#8edbff">HERMES AGENT · PR #65740</text>
+    </g>
+    <text x="70" y="96" class="title" fill="#f4f8ff">Configurable Gateway Agent Executor Capacity</text>
+    <text x="70" y="128" class="subtitle" fill="#aebdd3">One setting controls synchronous turn execution without changing cross-surface session admission.</text>
+  </g>
+
+  <!-- Main flow baseline behind cards -->
+  <path d="M360 341H1248" fill="none" stroke="url(#flowLine)" stroke-opacity="0.66" stroke-width="3" stroke-dasharray="8 9"/>
+  <!-- Step 1: config -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="178" width="290" height="326" rx="20" fill="#0d1c30" stroke="#38bdf8" stroke-opacity="0.58" stroke-width="1.5"/>
+    <rect x="70" y="178" width="290" height="7" rx="4" fill="#38bdf8"/>
+  </g>
+  <g class="sans">
+    <circle cx="104" cy="220" r="17" fill="#38bdf8" fill-opacity="0.17" stroke="#38bdf8"/>
+    <text x="104" y="226" text-anchor="middle" class="label" fill="#dff6ff">1</text>
+    <text x="133" y="227" class="cardTitle" fill="#7dd3fc">CONFIG INPUT</text>
+    <text x="96" y="270" class="nodeTitle" fill="#f4f8ff">config.yaml</text>
+    <rect x="94" y="293" width="242" height="99" rx="12" fill="#07121f" stroke="#47617d" stroke-opacity="0.65"/>
+    <text x="108" y="326" class="mono code" fill="#a7f3d0">gateway:</text>
+    <text x="108" y="358" class="mono" font-size="14.5" font-weight="560" fill="#dbeafe">  agent_executor_workers: N</text>
+    <text x="96" y="425" class="body" fill="#bdc9da">Public behavioral config</text>
+    <text x="96" y="453" class="small" fill="#8fa2bb">Nested key loaded by the</text>
+    <text x="96" y="478" class="small" fill="#8fa2bb">profile-aware gateway config.</text>
+  </g>
+
+  <!-- Arrow 1 -->
+  <path d="M374 341H418" stroke="#8bcdf3" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: validation -->
+  <g filter="url(#shadow)">
+    <rect x="430" y="178" width="390" height="326" rx="20" fill="#111a31" stroke="#a78bfa" stroke-opacity="0.62" stroke-width="1.5"/>
+    <rect x="430" y="178" width="390" height="7" rx="4" fill="#a78bfa"/>
+  </g>
+  <g class="sans">
+    <circle cx="464" cy="220" r="17" fill="#a78bfa" fill-opacity="0.17" stroke="#a78bfa"/>
+    <text x="464" y="226" text-anchor="middle" class="label" fill="#f0e7ff">2</text>
+    <text x="493" y="227" class="cardTitle" fill="#c4b5fd">PARSE &amp; VALIDATE</text>
+
+    <rect x="454" y="257" width="342" height="61" rx="12" fill="#0a251f" stroke="#34d399" stroke-opacity="0.55"/>
+    <circle cx="478" cy="287" r="8" fill="#34d399"/>
+    <text x="498" y="283" class="label" fill="#a7f3d0">VALID POSITIVE INTEGER</text>
+    <text x="498" y="306" class="small" fill="#bdd8cf">Resolve to N</text>
+
+    <rect x="454" y="331" width="342" height="61" rx="12" fill="#202217" stroke="#fbbf24" stroke-opacity="0.55"/>
+    <circle cx="478" cy="361" r="8" fill="#fbbf24"/>
+    <text x="498" y="357" class="label" fill="#fde68a">KEY OMITTED</text>
+    <text x="498" y="380" class="small" fill="#d9d1af">Historical default → 10</text>
+
+    <rect x="454" y="405" width="342" height="73" rx="12" fill="#2a1720" stroke="#fb7185" stroke-opacity="0.58"/>
+    <circle cx="478" cy="437" r="8" fill="#fb7185"/>
+    <text x="498" y="432" class="label" fill="#fecdd3">INVALID / NON-POSITIVE</text>
+    <text x="498" y="455" class="small" fill="#e5bdc5">Warn + fall back to 10</text>
+    <text x="498" y="474" class="tiny" fill="#b78f99">0 · −1 · true · 1.5 · “many”</text>
+  </g>
+
+  <!-- Arrow 2 -->
+  <path d="M834 341H868" stroke="#aeb5f5" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: GatewayConfig -->
+  <g filter="url(#shadow)">
+    <rect x="880" y="178" width="300" height="326" rx="20" fill="#151a31" stroke="#818cf8" stroke-opacity="0.6" stroke-width="1.5"/>
+    <rect x="880" y="178" width="300" height="7" rx="4" fill="#818cf8"/>
+  </g>
+  <g class="sans">
+    <circle cx="914" cy="220" r="17" fill="#818cf8" fill-opacity="0.17" stroke="#818cf8"/>
+    <text x="914" y="226" text-anchor="middle" class="label" fill="#eef2ff">3</text>
+    <text x="943" y="227" class="cardTitle" fill="#a5b4fc">CONFIG CONTRACT</text>
+    <text x="906" y="277" class="nodeTitle" fill="#f4f8ff">GatewayConfig</text>
+    <rect x="906" y="301" width="248" height="70" rx="12" fill="#0b1324" stroke="#53648c" stroke-opacity="0.72"/>
+    <text x="1030" y="330" text-anchor="middle" class="mono code" fill="#c7d2fe">agent_executor_workers</text>
+    <text x="1030" y="355" text-anchor="middle" class="mono code" fill="#fbbf24">= resolved</text>
+    <g transform="translate(906 401)">
+      <path d="M18 6A18 18 0 1 1 4 17" fill="none" stroke="#818cf8" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M3 8L4 18L14 16" fill="none" stroke="#818cf8" stroke-width="2.4" stroke-linejoin="round"/>
+      <text x="50" y="17" class="body" fill="#c8d2e3">Serializes and round-trips</text>
+      <text x="50" y="44" class="small" fill="#8fa2bb">one resolved positive value</text>
+    </g>
+  </g>
+
+  <!-- Arrow 3 -->
+  <path d="M1194 341H1228" stroke="#8fc9b9" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: runtime -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="178" width="290" height="326" rx="20" fill="#0d2424" stroke="#34d399" stroke-opacity="0.62" stroke-width="1.5"/>
+    <rect x="1240" y="178" width="290" height="7" rx="4" fill="#34d399"/>
+  </g>
+  <g class="sans">
+    <circle cx="1274" cy="220" r="17" fill="#34d399" fill-opacity="0.16" stroke="#34d399"/>
+    <text x="1274" y="226" text-anchor="middle" class="label" fill="#dcfce7">4</text>
+    <text x="1303" y="227" class="cardTitle" fill="#6ee7b7">RUNTIME CAPACITY</text>
+    <text x="1266" y="274" class="nodeTitle" fill="#f4f8ff">GatewayRunner</text>
+    <text x="1266" y="305" class="small" fill="#9eb2c3">Creates the pool only when needed</text>
+    <rect x="1266" y="329" width="238" height="91" rx="12" fill="#071a19" stroke="#2f766a" stroke-opacity="0.75"/>
+    <text x="1385" y="361" text-anchor="middle" class="mono code" fill="#a7f3d0">ThreadPoolExecutor(</text>
+    <text x="1385" y="390" text-anchor="middle" class="mono code" fill="#e0f2fe">max_workers=resolved</text>
+    <text x="1385" y="409" text-anchor="middle" class="mono tiny" fill="#a7f3d0">)</text>
+    <text x="1266" y="455" class="body" fill="#c5ded8">Runs synchronous messaging</text>
+    <text x="1266" y="482" class="body" fill="#c5ded8">gateway agent turns.</text>
+  </g>
+
+  <!-- Bottom card: separate controls -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="540" width="700" height="284" rx="20" fill="#0c192b" stroke="#435873" stroke-opacity="0.8"/>
+  </g>
+  <g class="sans">
+    <text x="96" y="579" class="cardTitle" fill="#8edbff">SEPARATE CONTROL PLANES</text>
+    <text x="96" y="608" class="small" fill="#8fa2bb">They interact under load, but neither replaces the other.</text>
+
+    <rect x="96" y="636" width="278" height="126" rx="14" fill="#10243b" stroke="#38bdf8" stroke-opacity="0.52"/>
+    <text x="116" y="671" class="mono code" fill="#7dd3fc">agent_executor_workers</text>
+    <text x="116" y="703" class="body" fill="#e5eef9">Execution capacity</text>
+    <text x="116" y="730" class="small" fill="#9eb1c8">Synchronous gateway turns</text>
+
+    <circle cx="434" cy="698" r="29" fill="#18233a" stroke="#64748b"/>
+    <text x="434" y="708" text-anchor="middle" class="nodeTitle" fill="#cbd5e1">≠</text>
+
+    <rect x="494" y="636" width="250" height="126" rx="14" fill="#171d35" stroke="#a78bfa" stroke-opacity="0.52"/>
+    <text x="514" y="671" class="mono code" fill="#c4b5fd">max_concurrent_sessions</text>
+    <text x="514" y="703" class="body" fill="#e5eef9">Admission capacity</text>
+    <text x="514" y="730" class="small" fill="#9eb1c8">CLI · TUI · dashboard · messaging</text>
+
+    <rect x="96" y="780" width="648" height="26" rx="8" fill="#07121f"/>
+    <text x="420" y="799" text-anchor="middle" class="tiny" fill="#a9bad0">More admitted sessions than workers ⇒ turns can queue for an executor slot.</text>
+  </g>
+
+  <!-- Bottom card: compatibility/lifecycle -->
+  <g filter="url(#shadow)">
+    <rect x="800" y="540" width="365" height="284" rx="20" fill="#151c2d" stroke="#766149" stroke-opacity="0.82"/>
+  </g>
+  <g class="sans">
+    <text x="826" y="579" class="cardTitle" fill="#fcd34d">COMPATIBILITY &amp; LIFECYCLE</text>
+    <g transform="translate(826 620)">
+      <circle cx="9" cy="5" r="6" fill="#34d399"/>
+      <text x="28" y="12" class="body" fill="#e6edf7">Omitted key keeps 10 workers</text>
+      <circle cx="9" cy="51" r="6" fill="#fbbf24"/>
+      <text x="28" y="58" class="body" fill="#e6edf7">Invalid value warns, then uses 10</text>
+      <circle cx="9" cy="97" r="6" fill="#818cf8"/>
+      <text x="28" y="104" class="body" fill="#e6edf7">Existing pool is not resized live</text>
+    </g>
+    <rect x="826" y="751" width="313" height="49" rx="11" fill="#292113" stroke="#fbbf24" stroke-opacity="0.58"/>
+    <path d="M846 776A13 13 0 1 1 857 788" fill="none" stroke="#fbbf24" stroke-width="2.3" stroke-linecap="round"/>
+    <path d="M852 786L860 788L860 780" fill="none" stroke="#fbbf24" stroke-width="2.3"/>
+    <text x="879" y="770" class="label" fill="#fde68a">RESTART TO APPLY</text>
+    <text x="879" y="791" class="tiny" fill="#d8c79f">Rollback: remove key or set 10, then restart</text>
+  </g>
+
+  <!-- Bottom card: sizing -->
+  <g filter="url(#shadow)">
+    <rect x="1195" y="540" width="335" height="284" rx="20" fill="#1b1827" stroke="#7c4e70" stroke-opacity="0.82"/>
+  </g>
+  <g class="sans">
+    <text x="1221" y="579" class="cardTitle" fill="#f0abfc">SIZING TRADE-OFF</text>
+    <text x="1221" y="619" class="body" fill="#a7f3d0">Higher N can reduce</text>
+    <text x="1221" y="646" class="body" fill="#a7f3d0">cross-session queueing.</text>
+    <path d="M1221 670H1504" stroke="#536176" stroke-opacity="0.7"/>
+    <text x="1221" y="704" class="body" fill="#fecdd3">It also increases:</text>
+    <text x="1221" y="733" class="small" fill="#d6c5d7">threads · memory · tool concurrency</text>
+    <text x="1221" y="759" class="small" fill="#d6c5d7">provider pressure · context switching</text>
+    <rect x="1221" y="781" width="283" height="25" rx="8" fill="#271525"/>
+    <text x="1362" y="799" text-anchor="middle" class="tiny" fill="#f5c2eb">No config cap ≠ a sizing recommendation</text>
+  </g>
+
+  <!-- Footer -->
+  <g class="sans">
+    <circle cx="72" cy="866" r="4" fill="#38bdf8" filter="url(#softGlow)"/>
+    <text x="86" y="872" class="tiny" fill="#7589a4">CONFIG → VALIDATION → RUNTIME · HISTORICAL DEFAULT PRESERVED · OPERATOR-SIZED CAPACITY</text>
+    <text x="1530" y="872" text-anchor="end" class="tiny" fill="#63748d">gateway.agent_executor_workers</text>
+  </g>
+</svg>
